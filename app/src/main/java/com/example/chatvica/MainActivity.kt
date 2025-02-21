@@ -5,7 +5,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.commit
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.chatvica.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -25,12 +26,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Загрузка ChatsFragment при запуске
-        if (savedInstanceState == null) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                add(R.id.fragment_container, ChatsFragment()) // Используйте id вашего контейнера
-            }
-        }
+        val navController = findNavController(R.id.nav_host_fragment)
+        binding.bottomNavigation.setupWithNavController(navController)
     }
 }
