@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.chatvica.R
 import com.example.chatvica.data.network.RetrofitClient
@@ -18,6 +19,7 @@ import com.example.chatvica.databinding.FragmentSettingsBinding
 import com.example.chatvica.ui.auth.AuthActivity
 import com.example.chatvica.data.network.AuthApiService
 import com.example.chatvica.data.network.ApiService
+import com.example.chatvica.data.storage.TokenManager
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -34,7 +36,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val token = SecureStorage.getToken(requireContext())
+        val token = TokenManager.getToken(requireContext())
         if (token != null) {
             lifecycleScope.launch {
                 try {
@@ -51,9 +53,15 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener {
-            SecureStorage.clearToken(requireContext())
-            startActivity(Intent(requireContext(), AuthActivity::class.java))
-            requireActivity().finish()
+            TokenManager.deleteToken(requireContext())
+
+            findNavController().navigate(
+                R.id.action_settings_to_auth,
+                null,
+                NavOptions.Builder()
+                    .setPopUpTo(R.id.main_nav_graph, true)
+                    .build()
+            )
         }
 
         val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)

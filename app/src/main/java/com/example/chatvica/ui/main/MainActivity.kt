@@ -14,6 +14,7 @@ import com.example.chatvica.R
 import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.databinding.ActivityMainBinding
 import androidx.core.view.doOnLayout
+import com.example.chatvica.data.storage.TokenManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Проверяем наличие токена
-        if (SecureStorage.getToken(this) == null) {
+        if (TokenManager.getToken(this) == null) {
             startActivity(Intent(this, com.example.chatvica.ui.auth.AuthActivity::class.java))
             finish()
             return

@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.chatvica.data.model.RegisterRequest
 import com.example.chatvica.data.network.RetrofitClient
 import com.example.chatvica.data.storage.SecureStorage
+import com.example.chatvica.data.storage.TokenManager
 import com.example.chatvica.databinding.FragmentRegisterBinding
 import com.example.chatvica.ui.main.MainActivity
 import kotlinx.coroutines.launch
@@ -38,7 +39,7 @@ class RegisterFragment : Fragment() {
                     if (response.isSuccessful) {
                         val token = response.body()?.token
                         if (token != null) {
-                            SecureStorage.saveToken(requireContext(), token)
+                            TokenManager.saveToken(requireContext(), token)
                             startActivity(Intent(requireContext(), MainActivity::class.java))
                             requireActivity().finish()
                         }

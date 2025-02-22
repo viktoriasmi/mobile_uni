@@ -1,6 +1,5 @@
 package com.example.chatvica.data.network
 
-import com.google.firebase.appdistribution.gradle.ApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

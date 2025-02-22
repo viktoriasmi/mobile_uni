@@ -13,6 +13,7 @@ import com.example.chatvica.R
 import com.example.chatvica.data.model.LoginRequest
 import com.example.chatvica.data.network.RetrofitClient
 import com.example.chatvica.data.storage.SecureStorage
+import com.example.chatvica.data.storage.TokenManager
 import com.example.chatvica.databinding.FragmentLoginBinding
 import com.example.chatvica.ui.main.MainActivity
 import kotlinx.coroutines.launch
@@ -39,8 +40,9 @@ class LoginFragment : Fragment() {
                     val response = authService.login(LoginRequest(username, password))
                     if (response.isSuccessful) {
                         val token = response.body()?.token
+                        val user = response.body()?.user
                         if (token != null) {
-                            SecureStorage.saveToken(requireContext(), token)
+                            TokenManager.saveToken(requireContext(), token)
                             startActivity(Intent(requireContext(), MainActivity::class.java))
                             requireActivity().finish()
                         }
