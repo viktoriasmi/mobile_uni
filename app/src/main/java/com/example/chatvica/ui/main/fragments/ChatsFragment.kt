@@ -1,4 +1,4 @@
-package com.example.chatvica
+package com.example.chatvica.ui.main.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.chatvica.R
 import com.example.chatvica.databinding.FragmentChatsBinding
 
 class ChatsFragment : Fragment() {

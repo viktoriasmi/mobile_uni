@@ -1,5 +1,6 @@
-package com.example.chatvica
+package com.example.chatvica.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +8,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.chatvica.R
+import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.databinding.ActivityMainBinding
 import androidx.core.view.doOnLayout
 
@@ -16,8 +19,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
+        // Проверяем наличие токена
+        if (SecureStorage.getToken(this) == null) {
+            startActivity(Intent(this, com.example.chatvica.ui.auth.AuthActivity::class.java))
+            finish()
+            return
+        }
+
+        enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -27,21 +37,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Use doOnLayout for a more concise solution
         binding.navHostFragment.doOnLayout {
             val navController = findNavController(R.id.nav_host_fragment)
             binding.bottomNavigation.setupWithNavController(navController)
         }
-
-        /*  Alternative using addOnGlobalLayoutListener (Less concise)
-         binding.navHostFragment.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-             override fun onGlobalLayout() {
-                 binding.navHostFragment.viewTreeObserver.removeOnGlobalLayoutListener(this) // Important: Remove the listener
-                 val navController = findNavController(R.id.nav_host_fragment)
-                 binding.bottomNavigation.setupWithNavController(navController)
-             }
-         })
-         */
-
     }
 }
