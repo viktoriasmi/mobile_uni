@@ -15,9 +15,9 @@ object SecureStorage {
             .build()
 
         return EncryptedSharedPreferences.create(
-            PREFS_NAME, // Используем имя файла
-            masterKey,
-            context,
+            context,          // Первый параметр - контекст
+            PREFS_NAME,       // Второй - имя файла
+            masterKey,         // Третий - мастер-ключ
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )

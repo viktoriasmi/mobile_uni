@@ -1,4 +1,5 @@
 package com.example.chatvica.data.model
 
-class UserResponse {
-}
+data class UserResponse(
+    val username: String,
+)

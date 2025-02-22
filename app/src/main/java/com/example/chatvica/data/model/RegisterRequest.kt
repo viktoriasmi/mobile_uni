@@ -1,4 +1,6 @@
 package com.example.chatvica.data.model
 
-class RegisterRequest {
-}
+data class RegisterRequest(
+    val username: String,
+    val password: String
+)

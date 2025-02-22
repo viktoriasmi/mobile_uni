@@ -16,6 +16,8 @@ import com.example.chatvica.data.network.RetrofitClient
 import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.databinding.FragmentSettingsBinding
 import com.example.chatvica.ui.auth.AuthActivity
+import com.example.chatvica.data.network.AuthApiService
+import com.example.chatvica.data.network.ApiService
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -38,7 +40,7 @@ class SettingsFragment : Fragment() {
                 try {
                     val response = RetrofitClient.apiService.getUser("Bearer $token")
                     if (response.isSuccessful) {
-                        binding.tvUserEmail.text = response.body()?.username
+                        binding.tvUserEmail.text = response.body()?.username?.let { it } ?: "No username"
                     } else {
                         Toast.makeText(requireContext(), "Failed to get user info", Toast.LENGTH_SHORT).show()
                     }

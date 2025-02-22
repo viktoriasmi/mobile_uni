@@ -1,4 +1,6 @@
-package com.example.chatvica.data.model;
+package com.example.chatvica.data.model
 
-public class AuthResponse {
-}
+data class AuthResponse(
+    val token: String,
+
+)
