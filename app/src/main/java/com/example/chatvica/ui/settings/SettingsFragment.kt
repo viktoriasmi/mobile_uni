@@ -40,14 +40,12 @@ class SettingsFragment : Fragment() {
         if (token != null) {
             lifecycleScope.launch {
                 try {
-                    val response = RetrofitClient.apiService.getUser("Bearer $token")
+                    val response = RetrofitClient.apiService.getUser("Bearer ${TokenManager.getToken(requireContext())}")
                     if (response.isSuccessful) {
-                        binding.tvUserEmail.text = response.body()?.username?.let { it } ?: "No username"
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to get user info", Toast.LENGTH_SHORT).show()
+                        binding.tvUserEmail.text = response.body()?.username ?: "Unknown"
                     }
-                } catch (e: HttpException) {
-                    Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
                 }
             }
         }
