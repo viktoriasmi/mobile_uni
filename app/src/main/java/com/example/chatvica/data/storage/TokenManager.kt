@@ -2,7 +2,7 @@ package com.example.chatvica.data.storage
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 
 object TokenManager {
     private const val PREF_NAME = "secure_prefs"
@@ -10,9 +10,11 @@ object TokenManager {
 
     private fun getEncryptedSharedPreferences(context: Context) =
         EncryptedSharedPreferences.create(
-            PREF_NAME,
-            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
             context,
+            PREF_NAME,
+            MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build(),
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
