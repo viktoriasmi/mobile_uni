@@ -16,6 +16,8 @@ import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.data.storage.TokenManager
 import com.example.chatvica.databinding.FragmentLoginBinding
 import com.example.chatvica.ui.main.MainActivity
+import com.google.gson.JsonParser
+import java.io.IOException
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
@@ -40,21 +42,31 @@ class LoginFragment : Fragment() {
                     val response = authService.login(LoginRequest(username, password))
                     if (response.isSuccessful) {
                         val token = response.body()?.token
-                        val user = response.body()?.user
                         if (token != null) {
                             TokenManager.saveToken(requireContext(), token)
                             startActivity(Intent(requireContext(), MainActivity::class.java))
                             requireActivity().finish()
+                        } else {
+                            Toast.makeText(requireContext(), "Invalid response", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "Login failed", Toast.LENGTH_SHORT).show()
+                        val errorBody = response.errorBody()?.string()
+                        val errorMessage = try {
+                            JsonParser.parseString(errorBody).asJsonObject["message"].asString
+                        } catch (e: Exception) {
+                            "Ошибка: ${response.code()}"
+                        }
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show()
+                } catch (e: IOException) { // Добавлен блок catch для сетевых ошибок
+                    Toast.makeText(requireContext(), "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) { // Общий блок catch
+                    Toast.makeText(requireContext(), "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

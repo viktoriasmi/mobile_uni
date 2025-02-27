@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
     private const val BASE_URL = "https://api.nogamenolife.pro/"
 
-    val authService: AuthApiService by lazy {
+    private val retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -16,19 +16,8 @@ object RetrofitClient {
                 level = HttpLoggingInterceptor.Level.BODY
             }).build())
             .build()
-            .create(AuthApiService::class.java)
     }
 
-    // Добавляем экземпляр для ApiService (для получения информации о пользователе)
-    val apiService: ApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }).build())
-            .build()
-            .create(ApiService::class.java)
-    }
-
+    val authService: AuthApiService by lazy { retrofit.create(AuthApiService::class.java) }
+    val apiService: ApiService by lazy { retrofit.create(ApiService::class.java) }
 }

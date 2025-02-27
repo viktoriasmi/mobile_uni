@@ -14,6 +14,8 @@ import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.data.storage.TokenManager
 import com.example.chatvica.databinding.FragmentRegisterBinding
 import com.example.chatvica.ui.main.MainActivity
+import com.google.gson.JsonParser
+import java.io.IOException
 import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
@@ -30,26 +32,39 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnRegister.setOnClickListener {
+            // Добавляем получение email
+            val email = binding.etEmail.text.toString()
             val username = binding.etUsername.text.toString()
             val password = binding.etPassword.text.toString()
 
             lifecycleScope.launch {
                 try {
-                    val response = authService.register(RegisterRequest(username, password))
+                    // Обновляем запрос с email
+                    val response = authService.register(RegisterRequest(username, email, password))
                     if (response.isSuccessful) {
                         val token = response.body()?.token
                         if (token != null) {
                             TokenManager.saveToken(requireContext(), token)
                             startActivity(Intent(requireContext(), MainActivity::class.java))
                             requireActivity().finish()
+                        } else {
+                            Toast.makeText(requireContext(), "Invalid response", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "Registration failed", Toast.LENGTH_SHORT).show()
+                        val errorBody = response.errorBody()?.string()
+                        val errorMessage = try {
+                            JsonParser.parseString(errorBody).asJsonObject["message"].asString
+                        } catch (e: Exception) {
+                            "Ошибка: ${response.code()}"
+                        }
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show()
+                } catch (e: IOException) { // Сетевые ошибки
+                    Toast.makeText(requireContext(), "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) { // Общие ошибки
+                    Toast.makeText(requireContext(), "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-            }
+                    }
         }
     }
 
