@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.chatvica.R
 import com.example.chatvica.data.model.LoginRequest
+import com.example.chatvica.data.network.AuthApiService
 import com.example.chatvica.data.network.RetrofitClient
 import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.data.storage.TokenManager
@@ -23,10 +24,15 @@ import kotlinx.coroutines.launch
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private val authService = RetrofitClient.authService
+    private lateinit var authService: AuthApiService // Изменено на lateinit
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        authService = RetrofitClient.getAuthService(requireContext()) // Инициализация здесь
         return binding.root
     }
 
@@ -34,18 +40,46 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnLogin.setOnClickListener {
-            val username = binding.etUsername.text.toString()
+            val login = binding.etUsername.text.toString()
             val password = binding.etPassword.text.toString()
+
+            if (login.isEmpty() || password.isEmpty()) {
+                Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             lifecycleScope.launch {
                 try {
-                    val response = authService.login(LoginRequest(username, password))
+                    val response = authService.login(LoginRequest(login, password))
                     if (response.isSuccessful) {
                         val token = response.body()?.token
                         if (token != null) {
                             TokenManager.saveToken(requireContext(), token)
-                            startActivity(Intent(requireContext(), MainActivity::class.java))
-                            requireActivity().finish()
+
+                            // Загрузка данных пользователя
+                            val apiService = RetrofitClient.getApiService(requireContext())
+                            try {
+                                val userResponse = apiService.getUser("Bearer $token", null)
+                                if (userResponse.isSuccessful) {
+                                    startActivity(Intent(requireContext(), MainActivity::class.java))
+                                    requireActivity().finish()
+                                } else {
+                                    val errorBody = userResponse.errorBody()?.string()
+                                    val errorMessage = try {
+                                        JsonParser.parseString(errorBody)
+                                            .asJsonObject["message"].asString
+                                    } catch (e: Exception) {
+                                        "Ошибка: ${userResponse.code()}"
+                                    }
+                                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Ошибка загрузки пользователя: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         } else {
                             Toast.makeText(requireContext(), "Invalid response", Toast.LENGTH_SHORT).show()
                         }
@@ -58,15 +92,14 @@ class LoginFragment : Fragment() {
                         }
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: IOException) { // Добавлен блок catch для сетевых ошибок
+                } catch (e: IOException) {
                     Toast.makeText(requireContext(), "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) { // Общий блок catch
+                } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

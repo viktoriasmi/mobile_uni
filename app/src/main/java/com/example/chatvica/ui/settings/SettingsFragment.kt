@@ -24,12 +24,13 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 class SettingsFragment : Fragment() {
-
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+    private lateinit var apiService: ApiService // Добавляем объявление сервиса
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        apiService = RetrofitClient.getApiService(requireContext()) // Инициализация сервиса
         return binding.root
     }
 
@@ -40,9 +41,9 @@ class SettingsFragment : Fragment() {
         if (token != null) {
             lifecycleScope.launch {
                 try {
-                    val response = RetrofitClient.apiService.getUser("Bearer ${TokenManager.getToken(requireContext())}")
+                    val response = apiService.getUser("Bearer $token")
                     if (response.isSuccessful) {
-                        binding.tvUserEmail.text = response.body()?.username ?: "Unknown"
+                        binding.tvUserEmail.text = response.body()?.name ?: "Unknown"
                     }
                 } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
