@@ -32,15 +32,19 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnRegister.setOnClickListener {
-            // Добавляем получение email
-            val email = binding.etEmail.text.toString()
-            val username = binding.etUsername.text.toString()
+            val login = binding.etUsername.text.toString()
+            val name = binding.etEmail.text.toString() // email теперь соответствует полю Name
             val password = binding.etPassword.text.toString()
 
             lifecycleScope.launch {
                 try {
-                    // Обновляем запрос с email
-                    val response = authService.register(RegisterRequest(username, email, password))
+                    val response = authService.register(
+                        RegisterRequest(
+                            login = login,
+                            name = name,
+                            password = password
+                        )
+                    )
                     if (response.isSuccessful) {
                         val token = response.body()?.token
                         if (token != null) {
