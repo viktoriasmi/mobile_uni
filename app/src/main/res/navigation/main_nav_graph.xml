@@ -32,6 +32,11 @@
         android:id="@+id/chatFragment"
         android:name="com.example.chatvica.ui.main.fragments.ChatFragment"
         android:label="Чат"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_chat">
+        <action
+            android:id="@+id/action_chatFragment_to_chatsFragment"
+            app:destination="@id/chatsFragment" />
+    </fragment>
+
 
 </navigation>

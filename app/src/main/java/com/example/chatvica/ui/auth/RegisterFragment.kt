@@ -73,6 +73,7 @@ class RegisterFragment : Fragment() {
                     if (response.isSuccessful) {
                         response.body()?.token?.let { token ->
                             TokenManager.saveToken(requireContext(), token)
+                            TokenManager.saveLogin(requireContext(), login)
                             navigateToMain()
                         } ?: showError("Пустой ответ от сервера")
                     } else {
@@ -110,14 +111,15 @@ class RegisterFragment : Fragment() {
 
     private fun validateInput(name: String, login: String, password: String): Boolean {
         val nameRegex = Regex("^[a-zA-Zа-яА-Я0-9 ]+\$")
+        val loginRegex = Regex("^[a-zA-Z0-9]+\$")
 
         if (!name.matches(nameRegex)) {
-            binding.etLogin.error = "Только буквы, цифры и пробелы"
+            binding.etName.error = "Только буквы, цифры и пробелы" // Исправлено etName
             return false
         }
 
-        if (login.length < 3) {
-            binding.etName.error = "Минимум 3 символа"
+        if (!login.matches(loginRegex)) {
+            binding.etLogin.error = "Только латинские буквы и цифры" // Добавлена проверка логина
             return false
         }
 
@@ -128,6 +130,7 @@ class RegisterFragment : Fragment() {
 
         return true
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

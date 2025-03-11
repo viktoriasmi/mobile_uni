@@ -14,10 +14,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.chatvica.R
 import com.example.chatvica.data.network.RetrofitClient
-import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.databinding.FragmentSettingsBinding
 import com.example.chatvica.ui.auth.AuthActivity
-import com.example.chatvica.data.network.AuthApiService
 import com.example.chatvica.data.network.ApiService
 import com.example.chatvica.data.storage.TokenManager
 import kotlinx.coroutines.launch
@@ -37,19 +35,8 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val token = TokenManager.getToken(requireContext())
-        if (token != null) {
-            lifecycleScope.launch {
-                try {
-                    val response = apiService.getUser("Bearer $token")
-                    if (response.isSuccessful) {
-                        binding.tvUserEmail.text = response.body()?.name ?: "Unknown"
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Ошибка загрузки данных", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        val login = TokenManager.getLogin(requireContext())
+        binding.tvUserEmail.text = login ?: "Неизвестный пользователь"
 
         binding.btnLogout.setOnClickListener {
             TokenManager.deleteToken(requireContext())

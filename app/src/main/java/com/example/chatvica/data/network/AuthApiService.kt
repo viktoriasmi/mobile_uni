@@ -22,8 +22,7 @@ interface AuthApiService {
 interface ApiService {
     @GET("users/user")
     suspend fun getUser(
-        @Header("Authorization") token: String,
-        @Query("userId") userId: String? = null // Добавляем query-параметр
+        @Query("userId") userId: String? = null
     ): Response<UserResponse>
 }
 

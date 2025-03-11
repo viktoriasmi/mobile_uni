@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Проверяем наличие токена
-        if (TokenManager.getToken(this) == null) {
+        if (TokenManager.getToken(this).isNullOrEmpty()) {
             startActivity(Intent(this, com.example.chatvica.ui.auth.AuthActivity::class.java))
             finish()
             return

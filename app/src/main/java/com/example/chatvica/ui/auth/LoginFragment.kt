@@ -40,8 +40,13 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnLogin.setOnClickListener {
-            val login = binding.etUsername.text.toString()
-            val password = binding.etPassword.text.toString()
+            val login = binding.etUsername.text.toString().trim()
+            val password = binding.etPassword.text.toString().trim()
+
+            if (!isValidLogin(login)) {
+                binding.etUsername.error = "Логин может содержать только буквы и цифры"
+                return@setOnClickListener
+            }
 
             if (login.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
@@ -55,11 +60,13 @@ class LoginFragment : Fragment() {
                         val token = response.body()?.token
                         if (token != null) {
                             TokenManager.saveToken(requireContext(), token)
+                            TokenManager.saveLogin(requireContext(), login)
 
                             // Загрузка данных пользователя
                             val apiService = RetrofitClient.getApiService(requireContext())
                             try {
-                                val userResponse = apiService.getUser("Bearer $token", null)
+                                // Получаем текущего пользователя без явного указания userId
+                                val userResponse = apiService.getUser()
                                 if (userResponse.isSuccessful) {
                                     startActivity(Intent(requireContext(), MainActivity::class.java))
                                     requireActivity().finish()
@@ -99,6 +106,11 @@ class LoginFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun isValidLogin(login: String): Boolean {
+        val regex = Regex("^[a-zA-Z0-9]+\$")
+        return login.matches(regex)
     }
 
     override fun onDestroyView() {

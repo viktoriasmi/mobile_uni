@@ -7,6 +7,7 @@ import androidx.security.crypto.MasterKey
 object TokenManager {
     private const val PREF_NAME = "secure_prefs"
     private const val KEY_TOKEN = "auth_token"
+    private const val KEY_LOGIN = "user_login"
 
     private fun getEncryptedSharedPreferences(context: Context) =
         EncryptedSharedPreferences.create(
@@ -32,5 +33,16 @@ object TokenManager {
     fun deleteToken(context: Context) {
         val prefs = getEncryptedSharedPreferences(context)
         prefs.edit().remove(KEY_TOKEN).apply()
+    }
+
+    fun saveLogin(context: Context, login: String) {
+        getEncryptedSharedPreferences(context).edit()
+            .putString(KEY_LOGIN, login)
+            .apply()
+    }
+
+    fun getLogin(context: Context): String? {
+        return getEncryptedSharedPreferences(context)
+            .getString(KEY_LOGIN, null)
     }
 }
