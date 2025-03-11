@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.chatvica.data.model.RegisterRequest
 import com.example.chatvica.data.network.AuthApiService
+import com.example.chatvica.data.network.NetworkUtils
 import com.example.chatvica.data.network.RetrofitClient
 import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.data.storage.TokenManager
@@ -38,12 +39,24 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnRegister.setOnClickListener {
-            val login = binding.etUsername.text.toString()
-            val name = binding.etEmail.text.toString()
-            val password = binding.etPassword.text.toString()
+            val login = binding.etLogin.text.toString().trim()
+            val name = binding.etName.text.toString().trim()
+            val password = binding.etPassword.text.toString().trim()
+
+            if (!validateInput(name, login, password)) return@setOnClickListener
+
+            if (!NetworkUtils.isInternetAvailable(requireContext())) {
+                showError("Нет подключения к интернету")
+                return@setOnClickListener
+            }
 
             if (login.isEmpty() || name.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
+                showError("Все поля обязательны для заполнения")
+                return@setOnClickListener
+            }
+
+            if (password.length < 6) {
+                showError("Пароль должен быть не менее 6 символов")
                 return@setOnClickListener
             }
 
@@ -58,54 +71,62 @@ class RegisterFragment : Fragment() {
                     )
 
                     if (response.isSuccessful) {
-                        val token = response.body()?.token
-                        if (token != null) {
+                        response.body()?.token?.let { token ->
                             TokenManager.saveToken(requireContext(), token)
-
-                            // Добавляем загрузку данных пользователя
-                            val apiService = RetrofitClient.getApiService(requireContext())
-                            try {
-                                val userResponse = apiService.getUser("Bearer $token", null)
-                                if (userResponse.isSuccessful) {
-                                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                                    requireActivity().finish()
-                                } else {
-                                    val errorBody = userResponse.errorBody()?.string()
-                                    val errorMessage = try {
-                                        JsonParser.parseString(errorBody)
-                                            .asJsonObject["message"]
-                                            .asString
-                                    } catch (e: Exception) {
-                                        "Ошибка: ${userResponse.code()}"
-                                    }
-                                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
-                                }
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Ошибка загрузки пользователя: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        } else {
-                            Toast.makeText(requireContext(), "Invalid response", Toast.LENGTH_SHORT).show()
-                        }
+                            navigateToMain()
+                        } ?: showError("Пустой ответ от сервера")
                     } else {
-                        val errorBody = response.errorBody()?.string()
+                        val errorCode = response.code()
                         val errorMessage = try {
-                            JsonParser.parseString(errorBody).asJsonObject["message"].asString
+                            response.errorBody()?.string()?.let {
+                                JsonParser.parseString(it)
+                                    .asJsonObject["message"]
+                                    .asString
+                            } ?: "Ошибка $errorCode"
                         } catch (e: Exception) {
-                            "Ошибка: ${response.code()}"
+                            "Ошибка $errorCode"
                         }
-                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        showError(errorMessage)
                     }
                 } catch (e: IOException) {
-                    Toast.makeText(requireContext(), "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                    showError("Проверьте подключение к интернету")
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
+                    showError("Неизвестная ошибка: ${e.message}")
                 }
             }
         }
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(requireContext(), MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+    }
+
+    private fun validateInput(name: String, login: String, password: String): Boolean {
+        val nameRegex = Regex("^[a-zA-Zа-яА-Я0-9 ]+\$")
+
+        if (!name.matches(nameRegex)) {
+            binding.etLogin.error = "Только буквы, цифры и пробелы"
+            return false
+        }
+
+        if (login.length < 3) {
+            binding.etName.error = "Минимум 3 символа"
+            return false
+        }
+
+        if (password.length < 6) {
+            binding.etPassword.error = "Минимум 6 символов"
+            return false
+        }
+
+        return true
     }
 
     override fun onDestroyView() {

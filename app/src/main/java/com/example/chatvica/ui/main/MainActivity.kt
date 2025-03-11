@@ -14,6 +14,7 @@ import com.example.chatvica.R
 import com.example.chatvica.data.storage.SecureStorage
 import com.example.chatvica.databinding.ActivityMainBinding
 import androidx.core.view.doOnLayout
+import androidx.navigation.fragment.NavHostFragment
 import com.example.chatvica.data.storage.TokenManager
 
 class MainActivity : AppCompatActivity() {
@@ -48,10 +49,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        binding.navHostFragment.doOnLayout {
-            val navController = findNavController(R.id.nav_host_fragment)
-            binding.bottomNavigation.setupWithNavController(navController)
-        }
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        binding.bottomNavigation.setupWithNavController(navController)
     }
 }

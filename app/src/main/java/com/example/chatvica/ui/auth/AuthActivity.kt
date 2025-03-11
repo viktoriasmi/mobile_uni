@@ -13,11 +13,18 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupViewPager()
+    }
+
+    private fun setupViewPager() {
         val adapter = AuthPagerAdapter(this)
         binding.viewPager.adapter = adapter
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = if (position == 0) "Вход" else "Регистрация"
+            tab.text = when(position) {
+                0 -> "Вход"
+                else -> "Регистрация"
+            }
         }.attach()
     }
 }

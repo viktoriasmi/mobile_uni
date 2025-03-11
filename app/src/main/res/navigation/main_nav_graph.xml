@@ -26,11 +26,6 @@
         android:name="com.example.chatvica.ui.settings.SettingsFragment"
         android:label="Настройки"
         tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_settings_to_auth"
-            app:destination="@id/authFragment"
-            app:popUpTo="@id/main_nav_graph"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

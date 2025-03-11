@@ -54,13 +54,11 @@ class SettingsFragment : Fragment() {
         binding.btnLogout.setOnClickListener {
             TokenManager.deleteToken(requireContext())
 
-            findNavController().navigate(
-                R.id.action_settings_to_auth,
-                null,
-                NavOptions.Builder()
-                    .setPopUpTo(R.id.main_nav_graph, true)
-                    .build()
-            )
+            val intent = Intent(requireContext(), AuthActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            requireActivity().finish()
         }
 
         val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)

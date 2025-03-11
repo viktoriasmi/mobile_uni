@@ -12,32 +12,28 @@ object RetrofitClient {
     private const val BASE_URL = "https://api.nogamenolife.pro/"
     private var retrofit: Retrofit? = null
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
     fun getClient(context: Context): Retrofit {
-        if (retrofit == null) {
-            val authInterceptor = Interceptor { chain ->
-                val token = TokenManager.getToken(context)
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer $token")
-                    .build()
-                chain.proceed(request)
-            }
-
-            val client = OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .addInterceptor(authInterceptor)
+        val authInterceptor = Interceptor { chain ->
+            val token = TokenManager.getToken(context)
+            val request = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $token")
                 .build()
-
-            retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
+            chain.proceed(request)
         }
-        return retrofit!!
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .addInterceptor(authInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
     }
 
     // Создаем сервисы через функцию с контекстом
